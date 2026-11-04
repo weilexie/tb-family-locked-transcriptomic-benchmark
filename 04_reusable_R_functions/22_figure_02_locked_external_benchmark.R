@@ -23,12 +23,12 @@ sf_plot_figure2 <- function() {
   h2h$display_name <- sf_display_model(h2h$signature_or_model)
   h2h$category <- dplyr::case_when(
     h2h$model_layer == "final_best_performance" ~ "Final selected model",
-    h2h$model_layer == "final_best_sparse" ~ "Sparse final model",
+    h2h$model_layer == "final_best_sparse" ~ "Penalized-linear model",
     h2h$model_layer == "reference_signature_ensemble" ~ "Signature ensemble",
     grepl("top_locked_external_overlap_free", h2h$comparator_reason, fixed = TRUE) ~ "Top overlap-free signature",
     TRUE ~ "Canonical/development signature"
   )
-  h2h$category <- factor(h2h$category, levels = c("Final selected model", "Sparse final model", "Signature ensemble", "Top overlap-free signature", "Canonical/development signature"))
+  h2h$category <- factor(h2h$category, levels = c("Final selected model", "Penalized-linear model", "Signature ensemble", "Top overlap-free signature", "Canonical/development signature"))
   h2h$AUROC_ci_low_plot <- ifelse(is.na(h2h$AUROC_ci_low), h2h$AUROC, h2h$AUROC_ci_low)
   h2h$AUROC_ci_high_plot <- ifelse(is.na(h2h$AUROC_ci_high), h2h$AUROC, h2h$AUROC_ci_high)
   h2h$has_auroc_ci <- is.finite(h2h$AUROC_ci_low) & is.finite(h2h$AUROC_ci_high) & (h2h$AUROC_ci_high > h2h$AUROC_ci_low)
@@ -39,7 +39,7 @@ sf_plot_figure2 <- function() {
   h2h$row_id <- seq_len(nrow(h2h))
   shared_y_levels <- levels(h2h$axis_label)
   shared_y_expand <- ggplot2::expansion(mult = c(0.02, 0.04))
-  cat_vals <- c("Final selected model" = sf_cols$primary, "Sparse final model" = sf_cols$sparse, "Signature ensemble" = sf_cols$ensemble, "Top overlap-free signature" = sf_cols$signature, "Canonical/development signature" = sf_cols$negative)
+  cat_vals <- c("Final selected model" = sf_cols$primary, "Penalized-linear model" = sf_cols$sparse, "Signature ensemble" = sf_cols$ensemble, "Top overlap-free signature" = sf_cols$signature, "Canonical/development signature" = sf_cols$negative)
   dev_grid <- sf_sanitize(sf_read_tsv("results/ml_final/development_combination_performance.tsv"))
   dev_grid <- dev_grid[is.finite(dev_grid$AUROC), , drop = FALSE]
   dev_grid$task_group <- sf_short_task(dev_grid$task)
@@ -55,14 +55,12 @@ sf_plot_figure2 <- function() {
   final_row <- h2h[h2h$model_layer == "final_best_performance", , drop = FALSE][1, ]
   reference_benchmark_row <- h2h[!grepl("^final", h2h$model_layer) & is.finite(h2h$AUROC), , drop = FALSE]
   reference_benchmark_row <- reference_benchmark_row[which.max(reference_benchmark_row$AUROC), , drop = FALSE]
-  oracle <- sf_sanitize(sf_read_tsv("results/ml_final/family_label_confounding_check.tsv"))
-  oracle_primary_dev <- oracle[oracle$task == "primary_ATB_vs_OD" & oracle$split == "development", , drop = FALSE][1, ]
   spectrum <- data.frame(
     point_type = "anchor",
-    anchor_role = c("chance", "within_family_permutation_benchmark", "final_locked_model", "best_reference_or_ensemble_benchmark", "family_label_oracle_bound"),
-    label = c("Chance\n0.500", sprintf("Within-family\npermutation %.3f", floor_row$AUROC_median), sprintf("Final model\n%.3f", final_row$AUROC), sprintf("Reference/ensemble\nbenchmark %.3f", reference_benchmark_row$AUROC), sprintf("Development family-label\noracle %.3f", oracle_primary_dev$family_oracle_AUROC)),
-    AUROC = c(0.5, floor_row$AUROC_median, final_row$AUROC, reference_benchmark_row$AUROC, oracle_primary_dev$family_oracle_AUROC),
-    source_table = c("reference", "negative_control_family_stratified_permutation.tsv", "Table2_reference_signature_locked_external_head_to_head.tsv", "Table2_reference_signature_locked_external_head_to_head.tsv", "family_label_confounding_check.tsv"),
+    anchor_role = c("within_family_permutation_benchmark", "final_locked_model", "best_reference_or_ensemble_benchmark"),
+    label = c(sprintf("Within-family\npermutation %.3f", floor_row$AUROC_median), sprintf("Final model\n%.3f", final_row$AUROC), sprintf("Reference/ensemble\nbenchmark %.3f", reference_benchmark_row$AUROC)),
+    AUROC = c(floor_row$AUROC_median, final_row$AUROC, reference_benchmark_row$AUROC),
+    source_table = c("negative_control_family_stratified_permutation.tsv", "Table2_reference_signature_locked_external_head_to_head.tsv", "Table2_reference_signature_locked_external_head_to_head.tsv"),
     stringsAsFactors = FALSE
   )
   spectrum$anchor_class <- dplyr::case_when(
@@ -107,22 +105,21 @@ sf_plot_figure2 <- function() {
   spectrum_out <- rbind(spectrum, dev_points, ext_points)
   anchor_y <- max(dev_grid$selector_y, na.rm = TRUE) + 1.45
   external_y <- max(dev_grid$selector_y, na.rm = TRUE) + .55
-  spectrum$label_y <- 1 + c(.28, -.28, .28, -.28, .28)
+  spectrum$label_y <- 1 + c(-.28, .28, -.28)
   spectrum$y <- 1
   benchmark_anchors <- spectrum[spectrum$anchor_class == "negative_control_or_reference_benchmark", , drop = FALSE]
   boundary <- spectrum[spectrum$anchor_class == "boundary", , drop = FALSE]
   final_anchor <- spectrum[spectrum$anchor_class == "final_model", , drop = FALSE]
   p3a_anchor <- ggplot2::ggplot() +
-    ggplot2::geom_segment(ggplot2::aes(x = .5, xend = oracle_primary_dev$family_oracle_AUROC, y = 1, yend = 1), linewidth = .42, colour = sf_cols$ink, linetype = 2, alpha = .78) +
     ggplot2::geom_segment(ggplot2::aes(x = floor_row$AUROC_median, xend = reference_benchmark_row$AUROC, y = 1, yend = 1), linewidth = 1.05, colour = sf_cols$warning) +
-    ggplot2::geom_point(data = boundary, ggplot2::aes(x = AUROC, y = y), shape = 21, size = 2.35, fill = "white", colour = sf_cols$ink, stroke = .35) +
+    { if (nrow(boundary) > 0) ggplot2::geom_point(data = boundary, ggplot2::aes(x = AUROC, y = y), shape = 21, size = 2.35, fill = "white", colour = sf_cols$ink, stroke = .35) else NULL } +
     ggplot2::geom_point(data = benchmark_anchors, ggplot2::aes(x = AUROC, y = y), shape = 21, size = 4.25, fill = sf_cols$warning, colour = sf_cols$ink, stroke = .34) +
     ggplot2::geom_point(data = final_anchor, ggplot2::aes(x = AUROC, y = y), shape = 21, size = 3.35, fill = sf_cols$primary, colour = sf_cols$ink, stroke = .30) +
     ggrepel::geom_label_repel(data = spectrum, ggplot2::aes(x = AUROC, y = y, label = label, fill = anchor_class), nudge_y = spectrum$label_y - 1, min.segment.length = 0, segment.size = .18, size = 2.0, label.padding = grid::unit(.08, "lines"), max.overlaps = Inf, colour = sf_cols$ink, show.legend = FALSE) +
-    ggplot2::scale_x_continuous(limits = c(.48, .96), breaks = c(.5, .6, .7, .8, .9), labels = NULL, expand = c(0, 0)) +
+    ggplot2::scale_x_continuous(limits = c(.48, .86), breaks = c(.5, .6, .7, .8), labels = NULL, expand = c(0, 0)) +
     ggplot2::scale_y_continuous(breaks = 1, labels = "Evidence\nanchors") +
     ggplot2::scale_fill_manual(values = c("boundary" = "white", "negative_control_or_reference_benchmark" = sf_cols$warning_light, "final_model" = sf_cols$primary_light), guide = "none") +
-    ggplot2::coord_cartesian(xlim = c(.48, .96), ylim = c(.56, 1.44), clip = "off") +
+    ggplot2::coord_cartesian(xlim = c(.48, .86), ylim = c(.56, 1.44), clip = "off") +
     ggplot2::labs(x = NULL, y = NULL) +
     sf_theme(7.0) +
     ggplot2::theme(
@@ -151,7 +148,7 @@ sf_plot_figure2 <- function() {
       "Stepwise GLM selectors" = sf_cols$warning
     ), guide = "none") +
     ggplot2::scale_shape_manual(values = c("Primary" = 16, "Expanded" = 1), name = NULL) +
-    ggplot2::coord_cartesian(xlim = c(.48, .96), ylim = c(.35, external_y + .45), clip = "on") +
+    ggplot2::coord_cartesian(xlim = c(.48, .86), ylim = c(.35, external_y + .45), clip = "on") +
     ggplot2::labs(x = "AUROC", y = NULL) +
     sf_theme(7.0) +
     ggplot2::guides(shape = ggplot2::guide_legend(override.aes = list(colour = sf_cols$ink, size = 2.3), nrow = 1)) +
@@ -258,8 +255,8 @@ sf_plot_figure2 <- function() {
 
   wf <- sf_sanitize(sf_read_tsv("results/ml_final/negative_control_family_stratified_permutation.tsv"))
   wf$task_label <- sf_short_task(wf$task)
-  wf$role_label <- paste(wf$task_label, ifelse(wf$selected_role == "best_performance", "best", "sparse"), sep = "\n")
-  wf$role_label <- factor(wf$role_label, levels = wf$role_label[order(wf$task_label, wf$AUROC_median)])
+  wf$role_label <- paste(wf$task_label, ifelse(wf$selected_role == "best_performance", "best", "penalized-\nlinear"), sep = "\n")
+  wf$role_label <- factor(wf$role_label, levels = wf$role_label[order(wf$AUROC_median)])
   wf$display_value <- sprintf("%.3f", wf$AUROC_median)
   p3d <- ggplot2::ggplot(wf, ggplot2::aes(x = role_label, y = AUROC_median, fill = task_label)) +
     ggplot2::geom_hline(yintercept = 0.5, linetype = 2, linewidth = .22, colour = sf_cols$muted) +
@@ -271,7 +268,7 @@ sf_plot_figure2 <- function() {
     ggplot2::labs(x = NULL, y = "AUROC median") +
     sf_theme(7.0) +
     ggplot2::theme(
-      axis.text.x = ggplot2::element_text(angle = 0, hjust = .5, lineheight = .86, size = 5.8),
+      axis.text.x = ggplot2::element_text(angle = 0, hjust = .5, lineheight = .80, size = 5.2),
       panel.border = ggplot2::element_rect(fill = NA, colour = sf_cols$border, linewidth = .34),
       plot.tag = ggplot2::element_text(face = "bold", size = 9.6, colour = sf_cols$ink, hjust = 0, vjust = 1),
       plot.margin = ggplot2::margin(6, 5.5, 4, 5.5)

@@ -9,12 +9,12 @@ sf_plot_figure3 <- function() {
   cal <- sf_calibration_bins()
   main_model <- c(
     "Primary" = "Signature-score SVM",
-    "Expanded" = "Sparse expanded model"
+    "Expanded" = "Ridge (penalized-linear)"
   )
   model_cols <- c(
     "Signature-score SVM" = sf_cols$primary,
-    "Sparse primary model" = sf_cols$sparse,
-    "Sparse expanded model" = "#6F8EC7",
+    "Penalized-linear primary" = sf_cols$sparse,
+    "Ridge (penalized-linear)" = "#6F8EC7",
     "Expanded random forest" = sf_cols$warning,
     "Top-10 signature mean ensemble" = "#82B9AA",
     "Top-5 signature mean ensemble" = "#82B9AA"
@@ -23,7 +23,7 @@ sf_plot_figure3 <- function() {
     if (task_group == "Primary") {
       c("Signature-score SVM", "Top-10 signature mean ensemble")
     } else {
-      c("Sparse expanded model", "Top-10 signature mean ensemble")
+      c("Ridge (penalized-linear)", "Top-10 signature mean ensemble")
     }
   }
   curves$display_model <- factor(curves$display_model, levels = names(model_cols))

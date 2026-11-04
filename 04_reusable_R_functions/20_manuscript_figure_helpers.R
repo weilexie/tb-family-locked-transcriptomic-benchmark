@@ -262,9 +262,9 @@ sf_family_short <- function(x) {
 sf_display_model <- function(x) {
   y <- sf_sanitize(data.frame(model = as.character(x), stringsAsFactors = FALSE))$model
   y[y == "reference_signature_scores+svm_rbf"] <- "Signature-score SVM"
-  y[y == "reference_signature_scores+elastic_net_075"] <- "Sparse primary model"
+  y[y == "reference_signature_scores+elastic_net_075"] <- "Penalized-linear primary"
   y[y == "stable_top100_plus_signature_scores+random_forest"] <- "Expanded random forest"
-  y[y == "stable_top100_plus_signature_scores+ridge_logistic"] <- "Sparse expanded model"
+  y[y == "stable_top100_plus_signature_scores+ridge_logistic"] <- "Ridge (penalized-linear)"
   y[y == "mean_top10_reference_signatures"] <- "Top-10 signature mean ensemble"
   y <- gsub("_OD_", " OD-", y)
   y <- gsub("_RISK_", " RISK-", y)
@@ -289,7 +289,7 @@ sf_selector_group <- function(selector) {
 sf_benchmark_axis_label <- function(display_name, category, n_families = NA, n_samples = NA) {
   role <- dplyr::case_when(
     category == "Final selected model" ~ "final locked model",
-    category == "Sparse final model" ~ "sparse final model",
+    category == "Penalized-linear model" ~ "penalized-linear model",
     category == "Signature ensemble" ~ "reference ensemble",
     category == "Top overlap-free signature" ~ "overlap-free signature",
     TRUE ~ "reference signature"
@@ -392,7 +392,7 @@ sf_prepare_curve_plot_inputs <- function() {
   selected_specs <- data.frame(
     task = c("primary_ATB_vs_OD", "expanded_ATB_vs_nonATB"),
     selected_role = c("best_performance", "best_sparse"),
-    display_name = c("Signature-score SVM", "Sparse expanded model"),
+    display_name = c("Signature-score SVM", "Ridge (penalized-linear)"),
     stringsAsFactors = FALSE
   )
   curve_rows <- lapply(seq_len(nrow(selected_specs)), function(i) {
@@ -560,7 +560,7 @@ sf_write_visualization_counts_master <- function() {
 }
 
 sf_summary_block <- function(metrics, task_group) {
-  main_model <- if (task_group == "Primary") "Signature-score SVM" else "Sparse expanded model"
+  main_model <- if (task_group == "Primary") "Signature-score SVM" else "Ridge (penalized-linear)"
   m <- metrics[metrics$task_group == task_group & metrics$display_model == main_model, , drop = FALSE][1, ]
   block <- data.frame(
     metric = c("AUROC", "AUPRC", "Sensitivity", "Specificity", "Brier", "Slope"),

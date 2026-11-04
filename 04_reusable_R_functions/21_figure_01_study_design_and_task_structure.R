@@ -145,15 +145,11 @@ sf_plot_figure1 <- function() {
   oracle <- oracle[oracle$task == "primary_ATB_vs_OD", , drop = FALSE]
   oracle$split_label <- ifelse(oracle$split == "development", "Development", "Locked external")
   oracle$split_label <- factor(oracle$split_label, levels = c("Development", "Locked external"))
-  final_primary <- sf_sanitize(sf_read_tsv("results/ml_final/family_cluster_bootstrap_ci.tsv"))
-  final_primary <- final_primary[final_primary$task == "primary_ATB_vs_OD" & final_primary$selected_role == "best_performance", , drop = FALSE][1, ]
   p1d <- ggplot2::ggplot(oracle, ggplot2::aes(x = split_label, y = family_oracle_AUROC, fill = split_label)) +
     ggplot2::geom_hline(yintercept = 0.5, linetype = 2, colour = sf_cols$negative, linewidth = .3) +
-    ggplot2::geom_hline(yintercept = final_primary$AUROC, linetype = 3, colour = sf_cols$primary, linewidth = .38) +
     ggplot2::geom_segment(ggplot2::aes(xend = split_label, y = .5, yend = family_oracle_AUROC), linewidth = .62, colour = sf_cols$muted) +
     ggplot2::geom_point(shape = 21, size = 3.85, colour = sf_cols$ink, stroke = .28) +
     ggplot2::geom_text(ggplot2::aes(label = sprintf("%.3f", family_oracle_AUROC)), vjust = -0.85, fontface = "bold", size = 2.55, colour = sf_cols$ink) +
-    ggplot2::annotate("label", x = 1.50, y = final_primary$AUROC + .034, label = paste0("Final model ", sf_num(final_primary$AUROC)), hjust = 0, size = 1.82, colour = sf_cols$primary, fill = "white", linewidth = .14, label.padding = grid::unit(.08, "lines")) +
     ggplot2::scale_fill_manual(values = c("Development" = sf_cols$failure_light, "Locked external" = sf_cols$signature_light), guide = "none") +
     ggplot2::coord_cartesian(ylim = c(0.45, 1.0), clip = "off") +
     ggplot2::labs(x = NULL, y = "Family-label oracle AUROC") +
