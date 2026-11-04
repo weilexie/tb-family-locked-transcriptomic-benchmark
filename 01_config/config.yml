@@ -1,0 +1,150 @@
+project:
+  name: tb_multicohort_ml
+  seed: 20260501
+  mode_default: manuscript_final
+  overwrite_external_validation_lockfile: false
+  stop_if_critical_review_fails: true
+
+runtime:
+  use_renv: false
+  internet_required_phases: ["metadata", "download"]
+  cache_downloads: true
+  n_cores: 1
+  verbose: true
+
+packages:
+  minimal_core: [yaml, jsonlite, testthat, data.table, glmnet, pROC, limma]
+  bioconductor_core: [curatedTBData, ExperimentHub, MultiAssayExperiment, SummarizedExperiment, HGNChelper]
+  benchmark_optional: [TBSignatureProfiler, singscore, GSVA]
+  secondary_optional: [ranger, xgboost]
+  secondary_optional_extra: [gbm, randomForest]
+  biology_optional: [clusterProfiler, ReactomePA, msigdbr, fgsea]
+  mr_optional: [TwoSampleMR, coloc, ieugwasr]
+
+study_selection:
+  allowed_tissues_regex: "whole blood|peripheral blood|blood|PBMC"
+  excluded_tissues_regex: "sputum|lung tissue|spinal|bone|abscess|lymph node|lesion"
+  baseline_only: true
+  unknown_treatment_default: exclude
+  min_per_class_main: 10
+  min_per_class_sensitivity: 5
+  min_total_samples_per_study: 20
+
+labels:
+  positive_class: ATB
+  harmonized_classes: [ATB, LTBI, OD, HC, OTHER_EXCLUDE]
+  task_definitions:
+    primary_ATB_vs_OD:
+      positive: [ATB]
+      negative: [OD]
+      priority: primary
+    secondary_ATB_vs_LTBI:
+      positive: [ATB]
+      negative: [LTBI]
+      priority: secondary
+    expanded_ATB_vs_nonATB:
+      positive: [ATB]
+      negative: [OD, LTBI, HC]
+      priority: exploratory
+
+cohort_family:
+  enabled: true
+  split_unit_primary: cohort_family
+  fallback_split_unit: study
+  manual_override_file: config/cohort_family_overrides.yml
+
+feasibility_gate:
+  primary_task: primary_ATB_vs_OD
+  green_min_independent_families: 5
+  green_min_external_families: 2
+  green_min_total_samples: 200
+  yellow_min_independent_families: 3
+  yellow_min_external_families: 1
+  yellow_min_total_samples: 100
+  red_action: benchmark_only
+
+external_validation:
+  lock_before_feature_screen: true
+  target_fraction_families: 0.25
+  min_external_families_green: 2
+  min_external_families_yellow: 1
+  require_each_external_family_has_both_classes: true
+  min_per_class_external: 10
+  deterministic_selection: true
+  no_external_fallback: development_lofo_only_no_external_claim
+
+expression:
+  gene_id_primary: HGNC_symbol
+  update_gene_symbols: true
+  drop_ambiguous_symbols: true
+  duplicate_gene_rule: highest_mean_expression
+  log2_detection:
+    q99_gt: 100
+    max_gt: 1000
+    offset: 1
+  missing_gene_max_fraction_training: 0.20
+
+normalization:
+  run_modes: [deployment_locked_training_scaler, samplewise_rank_percentile, cohortwise_zscore_benchmark_only]
+  primary_claim_allowed_modes: [deployment_locked_training_scaler, samplewise_rank_percentile]
+  winsorize_quantiles: [0.01, 0.99]
+
+reference_signature_benchmark:
+  use_TBSignatureProfiler_if_available: true
+  manual_scoring_fallback: true
+  use_SignatureInfoTraining_overlap: true
+  minimum_gene_coverage_primary: 0.60
+  exclude_discovery_overlap_primary_summary: true
+  scoring_methods_primary: [signed_mean_rank, singscore]
+
+feature_screen:
+  method: training_only_studywise_limma_meta
+  min_direction_consistency: 0.60
+  min_nominal_p_fraction: 0.40
+  min_de_studies: 3
+  candidate_pool_min: 30
+  candidate_pool_max: 100
+  gene_presence_min_training_studies: 0.80
+
+modeling:
+  primary_model: elastic_net_logistic
+  secondary_models_enabled: true
+  secondary_algorithm_borrowing_note: report/ml_algorithm_borrowing_note.md
+  secondary_models_candidate_pool: [xgboost, gbm, random_forest]
+  secondary_model_selection_rule: "secondary comparators only; do not override sparse primary signature unless family-level gain is material and stable"
+  outer_cv_unit: cohort_family
+  inner_cv_unit: cohort_family
+  use_class_weights: true
+  no_smote_primary: true
+  elastic_net:
+    alpha_grid: [0, 0.25, 0.5, 0.75, 1]
+    lambda_rule: 1se_prefer_short
+    max_final_genes: 12
+    preferred_final_sizes: [4, 6, 8]
+    allowed_final_sizes: [4, 6, 8, 10, 12]
+
+thresholds:
+  derive_from_development_oof_predictions_only: true
+  output_thresholds: [youden, fixed_sensitivity_0.90, fixed_sensitivity_0.95, fixed_specificity_0.70, fixed_specificity_0.90]
+
+metrics:
+  primary: [AUROC, AUPRC, balanced_accuracy]
+  secondary: [sensitivity, specificity, PPV, NPV, Brier, calibration_intercept, calibration_slope]
+  bootstrap_ci: true
+  bootstrap_n: 1000
+  bootstrap_n_smoke: 50
+  summary_unit: study_or_family_first_then_meta
+
+negative_controls:
+  run_label_permutation: true
+  n_permutations: 1000
+  n_permutations_smoke: 20
+
+subgroups:
+  variables: [hiv_status, platform_type, geographical_region, age_group, tissue, control_type]
+  min_samples_per_subgroup: 30
+  no_refit_within_subgroup: true
+
+optional_mr:
+  enabled: false
+  write_as_exploratory_only: true

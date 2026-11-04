@@ -1,0 +1,29 @@
+# R workspace state
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+
+# Local dependency/cache folders
+renv/library/
+renv/staging/
+renv/sandbox/
+cache/
+.cache/
+
+# Runtime logs and temporary files
+11_logs/
+*.log
+*.tmp
+*.temp
+
+# Large generated public-data derivatives
+03_data_curated/
+07_results/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*
+

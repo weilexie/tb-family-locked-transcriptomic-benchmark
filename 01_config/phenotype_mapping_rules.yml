@@ -1,0 +1,11 @@
+rules:
+  ATB:
+    include_regex: "active TB|PTB|pulmonary tuberculosis|TB disease|microbiologically confirmed TB"
+    exclude_regex: "post-treatment|follow-up|cured|ambiguous"
+  OD:
+    include_regex: "other disease|other respiratory disease|pneumonia|respiratory infection|COPD|asthma|sarcoidosis"
+  LTBI:
+    include_regex: "latent TB|LTBI|IGRA positive|QFT positive|TST positive"
+  HC:
+    include_regex: "healthy control|asymptomatic uninfected|IGRA negative|QFT negative|TST negative"
+
