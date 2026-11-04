@@ -6,8 +6,8 @@ sf_plot_figureS4 <- function() {
     labels = c("Primary task", "Expanded task")
   )
   cal$role_label <- factor(
-    ifelse(cal$selected_role == "best_performance", "Best performance", "Sparse"),
-    levels = c("Best performance", "Sparse")
+    ifelse(cal$selected_role == "best_performance", "Best performance", "Penalized-linear"),
+    levels = c("Best performance", "Penalized-linear")
   )
   cal$method_label <- dplyr::case_when(
     cal$calibration_method == "raw_uncalibrated" ~ "Raw score",
@@ -50,8 +50,8 @@ sf_plot_figureS4 <- function() {
     p_metric +
       ggplot2::geom_point(position = ggplot2::position_dodge(width = .5), size = 2.15, alpha = .95) +
       ggplot2::facet_wrap(~task_label, nrow = 1) +
-      ggplot2::scale_colour_manual(values = c("Best performance" = sf_cols$signature, "Sparse" = sf_cols$warning), name = "Selected model") +
-      ggplot2::scale_shape_manual(values = c("Best performance" = 16, "Sparse" = 17), name = "Selected model") +
+      ggplot2::scale_colour_manual(values = c("Best performance" = sf_cols$signature, "Penalized-linear" = sf_cols$warning), name = "Selected model") +
+      ggplot2::scale_shape_manual(values = c("Best performance" = 16, "Penalized-linear" = 17), name = "Selected model") +
       ggplot2::scale_x_continuous(breaks = metric_breaks(metric_id), labels = metric_labels(metric_id)) +
       ggplot2::coord_cartesian(xlim = metric_limits(d$value)) +
       ggplot2::labs(title = panel_title, x = NULL, y = NULL) +
