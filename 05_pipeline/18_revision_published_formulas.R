@@ -2,11 +2,8 @@
 # Run from the revision-copy root. No training, threshold fitting, or external selection.
 options(stringsAsFactors = FALSE)
 root <- normalizePath(Sys.getenv("TBML_PROJECT_ROOT", unset = getwd()), winslash = "/")
-if (!grepl("TB ML_revision_temp_20261103_2308$", root)) {
-  stop("This revision script is restricted to the verified revision copy.")
-}
 Sys.setenv(TBML_PROJECT_ROOT = root)
-source(file.path(root, "04_reusable_R_functions", "00_load_all.R"))
+source(file.path(root, "04_R_functions", "00_load_all.R"))
 out_dir <- file.path(root, "07_results", "04_revision", "reference_signatures")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 write_out <- function(x, name) {

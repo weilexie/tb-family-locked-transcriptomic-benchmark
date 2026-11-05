@@ -1,7 +1,6 @@
 # Reviewer R2.1: distinguish metadata records from selected-assay samples.
 # This analysis preserves the submitted matrices, model predictions, and lock.
 root <- normalizePath(Sys.getenv("TBML_PROJECT_ROOT", unset = getwd()), winslash = "/", mustWork = TRUE)
-if (!grepl("TB ML_revision_temp_20261103_2308$", root)) stop("Run only in the revision copy.")
 out <- file.path(root, "07_results", "04_revision", "sample_mapping")
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
 read_tab <- function(path) read.delim(path, check.names = FALSE, stringsAsFactors = FALSE)

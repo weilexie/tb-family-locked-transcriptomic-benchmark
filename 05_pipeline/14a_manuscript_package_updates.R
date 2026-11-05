@@ -3,7 +3,7 @@
 
 if (!exists("project_path", mode = "function")) {
   Sys.setenv(TBML_PROJECT_ROOT = normalizePath(getwd(), winslash = "/", mustWork = TRUE))
-  source(file.path("04_reusable_R_functions", "00_load_all.R"))
+  source(file.path("04_R_functions", "00_load_all.R"))
 }
 
 stage <- Sys.getenv("TBML_PACKAGE_UPDATE_STAGE", unset = "standalone")

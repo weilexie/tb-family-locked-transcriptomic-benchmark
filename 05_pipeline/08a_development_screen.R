@@ -1,5 +1,5 @@
 # ML final development-screen stage
-# Sourced by scripts/08_ml_final_optimization.R.
+# Sourced by scripts/08_model_optimization.R.
 
 config <- read_config("config/config.yml")
 out_dir <- "results/ml_final"

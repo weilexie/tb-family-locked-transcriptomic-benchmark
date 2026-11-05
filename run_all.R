@@ -18,8 +18,8 @@ tbml_directory_aliases <- c(
   config = "01_config",
   data_meta = "02_data_meta",
   data_curated = "03_data_curated",
-  R = "04_reusable_R_functions",
-  scripts = "05_pipeline_scripts",
+  R = "04_R_functions",
+  scripts = "05_pipeline",
   tests = "06_validation_tests",
   results = "07_results",
   manuscript = "08_manuscript",
@@ -78,7 +78,7 @@ if (mode == "prepare_data") {
 } else if (mode == "optimize_final") {
   for (s in c(
     "scripts/00_setup_packages.R",
-    "scripts/08_ml_final_optimization.R",
+    "scripts/08_model_optimization.R",
     "scripts/09_verify_final_results.R"
   )) run_script(s)
 } else if (mode == "enhance_final") {

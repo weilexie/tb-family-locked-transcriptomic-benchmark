@@ -3,7 +3,7 @@
 
 if (!exists("project_path", mode = "function")) {
   Sys.setenv(TBML_PROJECT_ROOT = normalizePath(getwd(), winslash = "/", mustWork = TRUE))
-  source(file.path("04_reusable_R_functions", "00_load_all.R"))
+  source(file.path("04_R_functions", "00_load_all.R"))
 }
 
 required <- c(
@@ -22,7 +22,7 @@ if (length(missing) > 0) {
 }
 
 Sys.setenv(TBML_PACKAGE_UPDATE_STAGE = "pre_figure")
-source(project_path("scripts/14_manuscript_package_updates.R"), local = TRUE)
+source(project_path("scripts/14a_manuscript_package_updates.R"), local = TRUE)
 source(project_path("scripts/15_integrate_validation_checks.R"), local = TRUE)
 
 sf_build_submission_figures()
@@ -51,7 +51,7 @@ file.copy(
 )
 
 Sys.setenv(TBML_PACKAGE_UPDATE_STAGE = "post_sync")
-source(project_path("scripts/14_manuscript_package_updates.R"), local = TRUE)
+source(project_path("scripts/14a_manuscript_package_updates.R"), local = TRUE)
 Sys.unsetenv("TBML_PACKAGE_UPDATE_STAGE")
 
 message("Final manuscript-facing figures, plot data, and captions refreshed under manuscript/.")

@@ -4,7 +4,7 @@
 
 if (!exists("project_path", mode = "function")) {
   Sys.setenv(TBML_PROJECT_ROOT = normalizePath(getwd(), winslash = "/", mustWork = TRUE))
-  source(file.path("04_reusable_R_functions", "00_load_all.R"))
+  source(file.path("04_R_functions", "00_load_all.R"))
 }
 
 out_dir <- "results/ml_final"
@@ -276,7 +276,7 @@ claim_audit <- data.frame(
     "09_submission/TB_ML_main_manuscript.md",
     "09_submission/TB_ML_main_manuscript.md",
     "09_submission/TB_ML_supplementary_information.md",
-    "04_reusable_R_functions/22_figure_02_locked_external_benchmark.R",
+    "04_R_functions/22_figure_02_locked_external_benchmark.R",
     "09_submission/build_tuberculosis_submission_package.py"
   ),
   risk_type = c(

@@ -1,5 +1,5 @@
 # ML final summary-report stage
-# Sourced by scripts/08_ml_final_optimization.R.
+# Sourced by scripts/08_model_optimization.R.
 
 completed_n <- sum(grid_status$status == "completed")
 skipped_n <- sum(grid_status$status == "skipped")

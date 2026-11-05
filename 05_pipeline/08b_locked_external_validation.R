@@ -1,5 +1,5 @@
 # ML final selected-model external validation stage
-# Sourced by scripts/08_ml_final_optimization.R.
+# Sourced by scripts/08_model_optimization.R.
 
 external_prediction_rows <- list()
 for (i in seq_len(nrow(selected))) {

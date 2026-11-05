@@ -32,9 +32,17 @@ Package versions are recorded in `renv.lock`. The pipeline currently runs with `
 
 ## Layout
 
+Folders are numbered in run order. `03_data_curated/` is created by `prepare_data` and is not stored in this repository.
+
 - `01_config/`: phenotype rules, family lock, seed
 - `02_data_meta/`: harmonized sample and family tables
-- `04_reusable_R_functions/`: helpers
-- `05_pipeline_scripts/`: numbered scripts 00-15
-- `revision_extras/`: revision-only mapping, permutation, and original-signature checks
-- `supplementary_tables/`: S1-S8 workbooks. S8 has 16 selective-prediction states (one primary elastic-net Sens>=0.90 rule infeasible in development).
+- `04_R_functions/`: helpers `00`–`30` (figures `21`–`30`)
+- `05_pipeline/`: scripts in order
+  - `00`–`07` prepare data and score reference signatures
+  - `08_model_optimization.R` calls `08a` development screen, `08b` locked external validation, `08c` summary
+  - `09`–`13` verification, ensembles, operating points, stress tests
+  - `14_refresh_manuscript_assets.R` calls `14a_manuscript_package_updates.R`, then `15`
+  - `16` sample-flow check, `17` statistics, `18` published formulas, `19` 10,000-permutation test
+- `06_supplementary_tables/`: S1–S8. S3 includes `published_formula_same_lock`. S8 has 16 selective-prediction states (primary elastic-net Sens>=0.90 was infeasible in development).
+
+Nested cross-validation is not in this deposit. The second model role is penalized-linear (primary elastic-net, expanded ridge).
