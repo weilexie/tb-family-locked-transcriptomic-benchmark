@@ -21,9 +21,9 @@ ci_text <- function(lo, hi) paste0(fmt(lo), "-", fmt(hi))
 display_model <- function(x) {
   y <- as.character(x)
   y[y %in% c("reference_signature_scores+svm_rbf", "published_signature_scores+svm_rbf")] <- "Signature-score SVM"
-  y[y %in% c("reference_signature_scores+elastic_net_075", "published_signature_scores+elastic_net_075")] <- "Sparse primary model"
+  y[y %in% c("reference_signature_scores+elastic_net_075", "published_signature_scores+elastic_net_075")] <- "Penalized-linear primary model"
   y[y == "stable_top100_plus_signature_scores+random_forest"] <- "Expanded random forest"
-  y[y == "stable_top100_plus_signature_scores+ridge_logistic"] <- "Sparse expanded model"
+  y[y == "stable_top100_plus_signature_scores+ridge_logistic"] <- "Penalized-linear expanded model"
   y[y %in% c("mean_top10", "mean_top10_reference_signatures")] <- "Top-10 signature mean ensemble"
   y[y == "mean_top5"] <- "Top-5 signature mean ensemble"
   y

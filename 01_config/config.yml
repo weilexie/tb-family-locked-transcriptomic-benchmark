@@ -111,7 +111,7 @@ modeling:
   secondary_models_enabled: true
   secondary_algorithm_borrowing_note: report/ml_algorithm_borrowing_note.md
   secondary_models_candidate_pool: [xgboost, gbm, random_forest]
-  secondary_model_selection_rule: "secondary comparators only; do not override sparse primary signature unless family-level gain is material and stable"
+  secondary_model_selection_rule: "secondary comparators only; do not override the penalized-linear primary signature unless family-level gain is material and stable"
   outer_cv_unit: cohort_family
   inner_cv_unit: cohort_family
   use_class_weights: true

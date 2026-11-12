@@ -6,8 +6,8 @@ sf_plot_figureS5 <- function() {
     labels = c("Primary task", "Expanded task")
   )
   risk$role_label <- factor(
-    ifelse(risk$selected_role == "best_performance", "Best performance model", "Sparse model"),
-    levels = c("Best performance model", "Sparse model")
+    ifelse(risk$selected_role == "best_performance", "Best performance", "Penalized-linear"),
+    levels = c("Best performance", "Penalized-linear")
   )
   risk$panel_label <- paste(risk$task_label, risk$role_label, sep = " / ")
   risk$.risk_row <- seq_len(nrow(risk))
